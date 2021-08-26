@@ -1,6 +1,11 @@
 #+TITLE: Readme
 
-[[alvo][teste]]
+[[#Titulo][so titulo]]
+
+[[#Titulo1][test1]]
+
+
+[[#Titulo2][test2]
 
 
 
@@ -24,9 +29,11 @@
 
 
 
+#+html-option: id:Titulo1
+* Titulo
 
-
-
+* outro titulo
+#+html-option: id:Titulo2
 
 
 
