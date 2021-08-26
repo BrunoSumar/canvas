@@ -2,12 +2,16 @@
 
 [[#Titulo][so titulo]]
 
-[[#Titulo1][test1]]
+
+[[#titulo1][test1]]
 
 
-[[#Titulo2][test2]
 
 
+[[#titulo2][test2]]
+
+
+[[#titulo3][test3]]
 
 [[alvo heading][link teste 2]]
 
@@ -29,15 +33,21 @@
 
 
 
-#+html-option: id:Titulo1
+#+ATTR_html: :id titulo2
 * Titulo
 
-* outro titulo
-#+html-option: id:Titulo2
+* Outro titulo
+:PROPERTIES:
+:ID: titulo1
+:CUSTOM_ID:  titulo1
+:END:
 
-
-
+*  Mais um heading
+:PROPERTIES:
+:CUSTOM_ID: titulo3
+:END:
 
 
 <<alvo>>
+
 * alvo heading
