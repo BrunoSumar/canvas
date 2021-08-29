@@ -7,7 +7,6 @@
 
 
 
-
 [[#titulo2][test2]]
 
 
@@ -44,7 +43,7 @@
 
 *  Mais um heading
 :PROPERTIES:
-:CUSTOM_ID: titulo3
+:CUSTOM_ID: titulo
 :END:
 
 

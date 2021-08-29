@@ -13,7 +13,8 @@ const createWebglContext = (canvasId, FRAGMENT_SHADER_TEXT) => {
     // Canvas os a imagem será rederizada
     const canvas = document.getElementById(canvasId);
     if(!canvas)
-        return
+        throw new Error("Canvas não encontrado")
+    canvas.style.display = 'block';
 
     //  salvar o contexto webGL usado
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -113,6 +114,7 @@ const createWebglContext = (canvasId, FRAGMENT_SHADER_TEXT) => {
         const pai = canvas.parentNode;
         pai.removeChild(canvas);
         const temp = document.createElement('canvas');
+        temp.style.display = 'none';
         temp.id = canvasId;
         pai.prepend(temp);
         gl.bindBuffer(gl.ARRAY_BUFFER, null)
@@ -128,37 +130,63 @@ const createWebglContext = (canvasId, FRAGMENT_SHADER_TEXT) => {
     })
 }
 
-// Captura posição do mouse
-
-
-
 // createWebglContext('c', VERTEX_SHADER_TEXT, FRAGMENT_SHADER_TEXT)
-
 
 
 // Gambiarra pra trocar o shader ao atualizar a variavel, clicar na tela atualizar etc
 
-let fragText = null
 let shaderName = null
+let fragText = null
 let destroyContext = () => null
 
-Object.defineProperty(this, 'Shader', {
-    get: function () { return shaderName;},
-    set: async function (v) {
-        !destroyContext || destroyContext()
-        shaderName = v
-        console.log(`Shader alterado para ${v}`)
+const stop = () => {
+    destroyContext && destroyContext()
+    destroyContext = null
+}
+
+const show = async (name = shaderName) => {
+    try{
+        stop()
+        shaderName = name
         let res = await fetch(`fragments/${shaderName}.frag`)
         fragText = await res.text()
         destroyContext = createWebglContext('c', fragText)
-    },
-});
-
-if(!shaderName)
-    Shader = "initial"
-else
-    Shader = Shader
-
-const atualizar = () => {
-    Shader = Shader
+        console.log(`Shader alterado para ${name}`)
+        return true
+    }catch(e){
+        console.error(e)
+        return false
+    }
 }
+
+show('initial')
+
+// const update = show
+
+
+// gambiarra pra atualizar o shader em caso de alteração no servidor
+// só funciona com servidor de desenvolvimento aberto
+
+let watch = () => false
+if(location.origin.includes('10001')){
+    const socketUrl = 'ws://localhost:10001/watch';
+    const socket = new WebSocket(socketUrl);
+
+    socket.addEventListener('message',(e)=>{
+        show()
+    });
+
+    watch = async (name = shaderName) => {
+        try{
+            await socket.send(name)
+            return true
+        }catch(e){
+            console.error(e)
+            return false
+        }
+    }
+
+    setTimeout(watch, 1500)
+}
+
+const use = (name) => show(name) && watch(name)
