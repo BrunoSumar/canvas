@@ -14,10 +14,13 @@ void main()
   m.x *= ratio;
 
   float dist = length(uv-m);
-  dist = step(.75, dist);
+  // dist = step(.75, dist);
+  dist = step(.8, dist);
 
-  uv *= 4.;
-  uv.x += cos(uv.y)+uv.y/2.;
+  // uv *= 4.;
+  uv *= 1.2;
+  uv.y *= 2.;
+  uv.x += cos(uv.y)+uv.y/1.7;
   uv += Time/3000.;
 
   vec2 i = floor(uv);
@@ -31,7 +34,8 @@ void main()
   t = step(.5, f.x);
   // t = step(.3, dist) * t;
   // t = 1. - t;
-  t = mix(t, 1.-t, dist);
+  // t = mix(t, 1.-t, dist);
+  t = t * (1. - dist);
 
-  gl_FragColor = mix(a, b, t);
+  gl_FragColor = mix(b, a, t);
 }
