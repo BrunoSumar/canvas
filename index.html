@@ -6,27 +6,17 @@
         <title>canvas webgl</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" href="./fav.ico"/>
-        <style>
-         body {
-             margin: 0;
-             padding: 0;
-             border: 0;
-             width: 100vw;
-             height: 100vh;
-             overflow: hidden;
-             background: #444;
-             display: grid;
-         }
-         canvas {
-             margin: auto;
-             width: 800px;
-             height: 600px;
-         }
-        </style>
+        <link rel="stylesheet" href="./base.css"/>
     </head>
     <body onclick="true || update()">
-        <canvas id="c">a</canvas>
-        <details ><summary >asdfasdfasd</summary> <div onclick="use('noise')">mais coisa aqui</div></details>
+        <div id="cContainer" class="container">
+            <canvas id="c"></canvas>
+            <details class="dark">
+                <summary><h3 id="cTitle">nome shder </h3></summary>
+                <p id="cText" class="shader">codigo do shader</p>
+            </div>
+        </div>
+        <div id="lista" class="container footer">&#9787</div>
         <script defer src="base.js"></script>
     </body>
 </html>

@@ -126,7 +126,6 @@ const createWebglContext = (canvasId, FRAGMENT_SHADER_TEXT) => {
         gl.deleteShader(vertexShader)
         gl.deleteBuffer(vertexBufferObject)
         gl.canvas.width = gl.canvas.height = 1
-        // console.log('contexto destruido')
     })
 }
 
@@ -138,22 +137,31 @@ const createWebglContext = (canvasId, FRAGMENT_SHADER_TEXT) => {
 let shaderName = null
 let fragText = null
 let destroyContext = () => null
+const canvasContainer = document.getElementById('cContainer');
+const canvasTitle= document.getElementById('cTitle');
+const canvasText= document.getElementById('cText');
 
+// TODO: ao inves de destruir o contexto deveria apenas recompilar o shader
 const stop = () => {
     destroyContext && destroyContext()
     destroyContext = null
+    canvasContainer.style.display = 'none'
 }
 
 const show = async (name = shaderName) => {
     try{
         stop()
+        canvasContainer.style.display = 'block'
         shaderName = name
         let res = await fetch(`fragments/${shaderName}.frag`)
         fragText = await res.text()
         destroyContext = createWebglContext('c', fragText)
         console.log(`Shader alterado para ${name}`)
+        canvasTitle.innerHTML = name
+        canvasText.innerHTML = fragText
         return true
     }catch(e){
+        stop()
         console.error(e)
         return false
     }

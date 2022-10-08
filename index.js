@@ -30,6 +30,13 @@ fastify.get('/watch', { websocket: true }, function wsHandler (connection, req) 
       console.log('Erro ao criar watcher')
     }
   })
+
+  connection.socket.on('close', message => {
+    if(!watcher)
+      return
+    watcher.close()
+    console.log('watcher destruido')
+  })
 })
 const Port = 10001
 fastify.listen(Port, function (err, address) {
