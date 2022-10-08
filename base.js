@@ -1,200 +1,229 @@
-const VERTEX_SHADER_TEXT = [
-    "precision mediump float;",
-    "attribute vec4 vertPosition;",
-    "varying vec2 Position;",
-    "void main()",
-    "{",
-    "    Position = vertPosition.xy;",
-    "    gl_Position = vertPosition;",
-    "}"
-].join('\n')
+const VERTEX_SHADER_TEXT = `
+    precision mediump float;
+    attribute vec4 vertPosition;
+    varying vec2 Position;
+    void main()
+    {
+        Position = vertPosition.xy;
+        gl_Position = vertPosition;
+    }
+`;
 
-const createWebglContext = (canvasId, FRAGMENT_SHADER_TEXT) => {
-    // Canvas os a imagem será rederizada
-    const canvas = document.getElementById(canvasId);
-    if(!canvas)
-        throw new Error("Canvas não encontrado")
-    canvas.style.display = 'block';
+const INITIAL_FRAGMENT_SHADER_TEXT = `
+    precision mediump float;
+    uniform float Time;
+    uniform vec2 Resolution;
+    uniform vec2 Mouse;
+    varying vec2 Position;
 
-    //  salvar o contexto webGL usado
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    // let gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    void main()
+    {
+        gl_FragColor = vec4(0.);
+    }
+`;
+
+const createWebglContext = ( canvasElement ) => {
+    console.log(canvasElement)
+    if(!canvasElement)
+        throw new Error("Canvas não encontrado");
+    canvasElement.style.display = 'block';
+
+    const gl = canvasElement.getContext('webgl') || canvasElement.getContext('experimental-webgl');
     if(!gl)
-        throw new Error("webGL não suportado")
+        throw new Error("webGL não suportado");
+
+    return gl;
+};
+
+const createShader = ( gl, shader_type, shader_text ) => {
+    const shader = gl.createShader( shader_type );
+
+    gl.shaderSource( shader, shader_text );
+
+    gl.compileShader( shader );
+    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) )
+        throw new Error(`Erro ao compilar shader (${ shader_type }): ${ gl.getShaderInfoLog(shader) }`);
+
+    return shader;
+};
+
+const attachShaderProgram = ( gl, program, ...shaders ) => {
+    console.log( program )
+    shaders.forEach( shader => gl.attachShader(program, shader) );
+
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+        throw new Error('ERROR linking program!' + gl.getProgramInfoLog(program));
+
+    gl.validateProgram(program);
+    if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS))
+        throw new Error('ERROR validating program!' + gl.getprogramInfoLog(program));
+
+    return program;
+};
+
+const updateShaderFunc = ( gl, program ) => {
+    return ( frag_text ) => {
+        const new_frag = createShader( gl, gl.FRAGMENT_SHADER, frag_text );
+        const old_frag = gl.getAttachedShaders( program )[0];
+        gl.detachShader( program, old_frag );
+        program = attachShaderProgram( gl, program, new_frag );
+        gl.useProgram( program );
+    };
+};
+
+const createVBO = ( gl ) => {
+    const vertex_buffer_object = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_object);
+
+    return vertex_buffer_object;
+};
+
+const setResolutionAttr = ( gl, program, width, height ) => {
+
+};
+
+const destroyContext = ( gl , canvas ) => {
+    const canvas_id = canvas.id;
+    const pai = canvas.parentNode;
+    pai.removeChild(canvas);
+    const new_canvas = document.createElement('canvas');
+    new_canvas.style.display = 'none';
+    new_canvas.id = canvas_id;
+    pai.prepend( new_canvas );
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.deleteProgram(program);
+    gl.deleteShader(fragmentShader);
+    gl.deleteShader(vertexShader);
+    gl.deleteBuffer(vertexBufferObject);
+    gl.canvas.width = gl.canvas.height = 1;
+};
+
+const createFragCanvas = ( canvas_id, FRAGMENT_SHADER_TEXT, resScale ) => {
+    const canvas = document.getElementById( canvas_id );
+    console.log( canvas , canvas_id )
+    const gl = createWebglContext( canvas );
 
     // Ajustando a resolução do viewport ao tamanho da tela
-    const resScale = 2
     canvas.width = resScale*canvas.clientWidth;
     canvas.height = resScale*canvas.clientHeight;
     gl.viewport(0, 0, canvas.width, canvas.height);
 
     // Criando e compilando os shaders
-    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-
-    gl.shaderSource(vertexShader, VERTEX_SHADER_TEXT);
-    gl.shaderSource(fragmentShader, FRAGMENT_SHADER_TEXT);
-
-    gl.compileShader(vertexShader);
-    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-        console.error('Erro ao compilar vertex shader', gl.getShaderInfoLog(vertexShader));
-        return;
-    }
-    gl.compileShader(fragmentShader);
-    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-        console.error('Erro ao compilar fragment shader', gl.getShaderInfoLog(fragmentShader));
-        return;
-    }
+    const vertex_shader = createShader( gl, gl.VERTEX_SHADER, VERTEX_SHADER_TEXT );
+    const fragment_shader = FRAGMENT_SHADER_TEXT ? createShader( gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER_TEXT ) : null;
 
     // Linkando shaders a um program
-    const program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error('ERROR linking program!', gl.getProgramInfoLog(program));
-        return;
-    }
-    gl.validateProgram(program);
-    if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-        console.error('ERROR validating program!', gl.getprogramInfoLog(program));
-        return;
-    }
-    gl.useProgram(program)
+    const program = attachShaderProgram( gl, gl.createProgram(), vertex_shader, fragment_shader );
+    gl.useProgram( program );
 
-    // Dados dos vértices do quad
-    const vertices =
-        [ /*| X |  Y |*/
-              1.,  1.,
-             -1.,  1.,
-             -1., -1.,
-              1., -1.
-        ];
+    // Criando e usando buffer
+    const vertex_buffer_object = createVBO( gl );
 
-    // Criando o buffer
-    const vertexBufferObject = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObject);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    const quad_vertices = [
+    /* | X |  Y |*/
+         1.,  1.,
+        -1.,  1.,
+        -1., -1.,
+         1., -1.
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(quad_vertices), gl.STATIC_DRAW);
 
-    // Configurando como a informação é lida
-    const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition'); //buscando o índice do atributo no shader
-    gl.vertexAttribPointer(positionAttribLocation, 2,gl.FLOAT, gl.FALSE, 2 * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.enableVertexAttribArray(positionAttribLocation);
+    // Configurando atributos do vertex shader
+    const position_attrib_location = gl.getAttribLocation(program, 'vertPosition');
+    gl.vertexAttribPointer(position_attrib_location, 2,gl.FLOAT, gl.FALSE, 2 * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.enableVertexAttribArray( position_attrib_location );
 
-    // Setando variáveis úteis
-    //   Resolução
-    const resLocation = gl.getUniformLocation(program, "Resolution")
-    gl.uniform2fv(resLocation, [canvas.width, canvas.height])
-    //   Tempo
-    const timeLocation = gl.getUniformLocation(program, "Time")
-    const begin = (new Date()).getTime()
-    gl.uniform1f(timeLocation, 0)
-    //   Posição do mouse
-    const mouseLocation = gl.getUniformLocation(program, "Mouse")
-    const mouse = [0,0]
-    canvas.addEventListener('mousemove', e => {
-        // Normaliza a posição do mouse no canvas
-        mouse[0] = 2*resScale*e.offsetX/canvas.width - 1
-        mouse[1] = 2*(canvas.height - resScale*e.offsetY)/canvas.height - 1
-    });
-    gl.uniform2fv(mouseLocation, mouse)
+    const begin = (new Date()).getTime();
+    const mouse_pos = [0,0];
 
-    // Main render loop
-    const fps = 1000/24
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
-    const intervalId = window.setInterval(() => {
-        gl.uniform1f(timeLocation, begin - (new Date()).getTime())
-        gl.uniform2fv(mouseLocation, mouse)
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
-    }, fps)
+    const drawFrag = ( time = begin ) => {
+        const res_location = gl.getUniformLocation(program, "Resolution");
+        gl.uniform2fv(res_location, [canvas.width, canvas.height]);
+        const time_location = gl.getUniformLocation(program, "Time");
+        gl.uniform1f(time_location, begin - time);
+        const mouse_location = gl.getUniformLocation(program, "Mouse");
+        gl.uniform2fv(mouse_location, mouse_pos);
 
-    // Retorna função que "limpa" o contexto e para o loop
-    return (() => {
-        window.clearInterval(intervalId);
-        const pai = canvas.parentNode;
-        pai.removeChild(canvas);
-        const temp = document.createElement('canvas');
-        temp.style.display = 'none';
-        temp.id = canvasId;
-        pai.prepend(temp);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null)
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-        gl.deleteProgram(program)
-        gl.deleteShader(fragmentShader)
-        gl.deleteShader(vertexShader)
-        gl.deleteBuffer(vertexBufferObject)
-        gl.canvas.width = gl.canvas.height = 1
-    })
-}
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+    };
 
-// createWebglContext('c', VERTEX_SHADER_TEXT, FRAGMENT_SHADER_TEXT)
+    return {
+        draw: drawFrag,
+        destroy: () => destroyContext( gl, canvas ),
+        update: updateShaderFunc( gl, program ),
+        mouse: mouse_pos,
+        resScale,
+        canvas,
+        gl,
+    };
+};
 
+const canvas_container = document.getElementById('cContainer');
+const canvas_title     = document.getElementById('cTitle');
+const canvas_text      = document.getElementById('cText');
 
-// Gambiarra pra trocar o shader ao atualizar a variavel, clicar na tela atualizar etc
+const frag_canvas = createFragCanvas( 'c', INITIAL_FRAGMENT_SHADER_TEXT, 2);
 
-let shaderName = null
-let fragText = null
-let destroyContext = () => null
-const canvasContainer = document.getElementById('cContainer');
-const canvasTitle= document.getElementById('cTitle');
-const canvasText= document.getElementById('cText');
+// Draw loop
+const fps = 24;
+const draw_interval = window.setInterval(
+    () => frag_canvas.draw( (new Date()).getTime() ),
+    1000/fps,
+);
 
-// TODO: ao inves de destruir o contexto deveria apenas recompilar o shader
-const stop = () => {
-    destroyContext && destroyContext()
-    destroyContext = null
-    canvasContainer.style.display = 'none'
-}
+const mouse_event = frag_canvas.canvas.addEventListener('mousemove', e => { // Normaliza a posição do mouse no canvas
+    frag_canvas.mouse[0] = 2 * frag_canvas.resScale * e.offsetX / frag_canvas.canvas.width - 1;
+    frag_canvas.mouse[1] = 2 * (frag_canvas.canvas.height - frag_canvas.resScale * e.offsetY) / frag_canvas.canvas.height - 1;
+});
 
-const show = async (name = shaderName) => {
+const show = async (name) => {
     try{
-        stop()
-        canvasContainer.style.display = 'block'
-        shaderName = name
-        let res = await fetch(`fragments/${shaderName}.frag`)
-        fragText = await res.text()
-        destroyContext = createWebglContext('c', fragText)
-        console.log(`Shader alterado para ${name}`)
-        canvasTitle.innerHTML = name
-        canvasText.innerHTML = fragText
-        return true
+        canvas_container.style.display = 'none';
+        const { body } = await fetch(`fragments/${name}.frag`);
+        let res = await fetch(`fragments/${name}.frag`);
+        const fragText = await res.text();
+        frag_canvas.update( fragText );
+
+        console.log(`Shader alterado para ${name}`);
+        canvas_title.innerHTML = name;
+        canvas_text.innerHTML = fragText;
+        canvas_container.style.display = 'block';
+        return true;
     }catch(e){
-        stop()
-        console.error(e)
-        return false
+        console.error(e);
+        return false;
     }
 }
-
-show('initial')
-
-// const update = show
-
 
 // gambiarra pra atualizar o shader em caso de alteração no servidor
-// só funciona com servidor de desenvolvimento aberto
-
+// só funciona com servidor local aberto
 let watch = () => false
 if(location.origin.includes('10001')){
     const socketUrl = 'ws://localhost:10001/watch';
     const socket = new WebSocket(socketUrl);
 
     socket.addEventListener('message',(e)=>{
-        show()
+        show( canvas_title.innerHTML );
     });
 
-    watch = async (name = shaderName) => {
+    watch = async (name) => {
         try{
-            await socket.send(name)
-            return true
+            await socket.send(name);
+            return true;
         }catch(e){
             console.error(e)
-            return false
+            return false;
         }
     }
 
-    setTimeout(watch, 1500)
+    setTimeout( () => watch(canvas_title.innerHTML), 1500);
 }
 
-const use = (name) => show(name) && watch(name)
+const use = (name) => show(name) && watch(name);
+
+use('initial');

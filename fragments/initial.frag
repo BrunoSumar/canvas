@@ -14,10 +14,8 @@ void main()
   m.x *= ratio;
 
   float dist = length(uv-m);
-  // dist = step(.75, dist);
   dist = step(.8, dist);
 
-  // uv *= 4.;
   uv *= 1.2;
   uv.y *= 2.;
   uv.x += cos(uv.y)+uv.y/1.7;
@@ -27,14 +25,13 @@ void main()
   vec2 f = fract(uv);
 
   vec4 a = vec4(vec3(.1, .6, 1.),1.);
+  // a = vec4(vec3(1., .0, .1),1.); // vermelho
+
   vec4 b = vec4(0.0);
 
 
   float t = step(0., cos(length(uv-m)*25.*(Time/100.)));
-  t = step(.5, f.x);
-  // t = step(.3, dist) * t;
-  // t = 1. - t;
-  // t = mix(t, 1.-t, dist);
+  t = step(.5, f.x );
   t = t * (1. - dist);
 
   gl_FragColor = mix(b, a, t);
