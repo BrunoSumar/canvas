@@ -23,7 +23,6 @@ const INITIAL_FRAGMENT_SHADER_TEXT = `
 `;
 
 const createWebglContext = ( canvasElement ) => {
-    console.log(canvasElement)
     if(!canvasElement)
         throw new Error("Canvas não encontrado");
     canvasElement.style.display = 'block';
@@ -48,7 +47,6 @@ const createShader = ( gl, shader_type, shader_text ) => {
 };
 
 const attachShaderProgram = ( gl, program, ...shaders ) => {
-    console.log( program )
     shaders.forEach( shader => gl.attachShader(program, shader) );
 
     gl.linkProgram(program);
@@ -105,7 +103,6 @@ const destroyContext = ( gl , canvas ) => {
 
 const createFragCanvas = ( canvas_id, FRAGMENT_SHADER_TEXT, resScale ) => {
     const canvas = document.getElementById( canvas_id );
-    console.log( canvas , canvas_id )
     const gl = createWebglContext( canvas );
 
     // Ajustando a resolução do viewport ao tamanho da tela
@@ -181,24 +178,29 @@ const mouse_event = frag_canvas.canvas.addEventListener('mousemove', e => { // N
     frag_canvas.mouse[1] = 2 * (frag_canvas.canvas.height - frag_canvas.resScale * e.offsetY) / frag_canvas.canvas.height - 1;
 });
 
+const updateFrag = async ( name ) => {
+    const res = await fetch(`fragments/${name}.frag`);
+    const frag_text = await res.text();
+    frag_canvas.update( frag_text );
+    return frag_text
+};
+
 const show = async (name) => {
     try{
         canvas_container.style.display = 'none';
-        const { body } = await fetch(`fragments/${name}.frag`);
-        let res = await fetch(`fragments/${name}.frag`);
-        const fragText = await res.text();
-        frag_canvas.update( fragText );
-
-        console.log(`Shader alterado para ${name}`);
-        canvas_title.innerHTML = name;
-        canvas_text.innerHTML = fragText;
+        const frag_text = await updateFrag( name );
+        if( name !== canvas_title.innerHTML ){
+            canvas_title.innerHTML = name;
+            canvas_text.innerHTML = frag_text;
+            console.log(`Shader alterado para ${name}`);
+        }
         canvas_container.style.display = 'block';
         return true;
     }catch(e){
         console.error(e);
         return false;
     }
-}
+};
 
 // gambiarra pra atualizar o shader em caso de alteração no servidor
 // só funciona com servidor local aberto
@@ -216,7 +218,7 @@ if(location.origin.includes('10001')){
             await socket.send(name);
             return true;
         }catch(e){
-            console.error(e)
+            // console.error(e);
             return false;
         }
     }
@@ -227,3 +229,26 @@ if(location.origin.includes('10001')){
 const use = (name) => show(name) && watch(name);
 
 use('initial');
+
+// Listar arquivos .fragment
+const getList = async ( path ) => {
+    const response = await fetch( path);
+    const { list } = await response.json();
+    console.log( list )
+    return list;
+};
+
+const listToOptions = ( list ) => {
+    return list.map( name => `<option value="${ name }">${ name }</option>` ).join(' ');
+};
+
+const displayOptions =  async () => {
+    const frags = await getList('/fragments/frags.json');
+    const options = listToOptions( frags );
+    const select = document.getElementById('list');
+    console.log(options)
+    select.innerHTML = options;
+    // select =
+};
+
+displayOptions();
