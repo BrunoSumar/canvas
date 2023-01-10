@@ -18,7 +18,7 @@ const INITIAL_FRAGMENT_SHADER_TEXT = `
 
     void main()
     {
-        gl_FragColor = vec4(0.);
+        gl_FragColor = vec4(.0);
     }
 `;
 
@@ -47,6 +47,7 @@ const createShader = ( gl, shader_type, shader_text ) => {
 };
 
 const attachShaderProgram = ( gl, program, ...shaders ) => {
+    console.log( shaders.length )
     shaders.forEach( shader => gl.attachShader(program, shader) );
 
     gl.linkProgram(program);
@@ -63,9 +64,10 @@ const attachShaderProgram = ( gl, program, ...shaders ) => {
 const updateShaderFunc = ( gl, program ) => {
     return ( frag_text ) => {
         const new_frag = createShader( gl, gl.FRAGMENT_SHADER, frag_text );
-        const old_frag = gl.getAttachedShaders( program )[0];
+        const [ vertex, old_frag ]  = gl.getAttachedShaders( program );
         gl.detachShader( program, old_frag );
-        program = attachShaderProgram( gl, program, new_frag );
+        // gl.deleteShader( program, old_frag );
+        program = attachShaderProgram( gl, program, new_frag, vertex );
         gl.useProgram( program );
     };
 };
@@ -182,7 +184,7 @@ const updateFrag = async ( name ) => {
     const res = await fetch(`fragments/${name}.frag`);
     const frag_text = await res.text();
     frag_canvas.update( frag_text );
-    return frag_text
+    return frag_text;
 };
 
 const show = async (name) => {
@@ -205,7 +207,7 @@ const show = async (name) => {
 // gambiarra pra atualizar o shader em caso de alteração no servidor
 // só funciona com servidor local aberto
 let watch = () => false
-if(location.origin.includes('10001')){
+if( location.origin.includes('10001') ){
     const socketUrl = 'ws://localhost:10001/watch';
     const socket = new WebSocket(socketUrl);
 
@@ -228,8 +230,6 @@ if(location.origin.includes('10001')){
 
 const use = (name) => show(name) && watch(name);
 
-use('initial');
-
 // Listar arquivos .fragment
 const getList = async ( path ) => {
     const response = await fetch( path);
@@ -245,10 +245,14 @@ const listToOptions = ( list ) => {
 const displayOptions =  async () => {
     const frags = await getList('/fragments/frags.json');
     const options = listToOptions( frags );
-    const select = document.getElementById('list');
-    console.log(options)
+    const select = document.getElementById('cList');
     select.innerHTML = options;
-    // select =
+    select.addEventListener('change', function ( e ) {
+        const selection = this.options[this.selectedIndex];
+        use( selection.value );
+    });
 };
 
 displayOptions();
+
+use('initial');

@@ -16,10 +16,13 @@ html {
     overflow: auto;
 }
 
-* {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     border: 0;
+    box-sizing: border-box;
 }
 
 body {
@@ -38,7 +41,6 @@ body {
     display: flex;
     flex-direction: column;
     align-content: center;
-
 
     /* overflow: hidden; */
 }
@@ -73,7 +75,7 @@ canvas {
     /* height: 6px; */
     /* margin: auto; */
     margin: auto;
-    width: 800px;
+    /* width: 800px; */
     height: 600px;
     /* height: 50vh; */
     /* width: 100%; */
@@ -98,3 +100,34 @@ details summary {
 details summary > * {
   display: inline;
 }
+
+select#cList {
+    /* outline: red 1px solid; */
+    /* appearance: none; */
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    padding: 0 1.7rem 1rem;
+    display: grid;
+}
+
+/* select#cList::-ms-expand { */
+/*   display: none; */
+/* } */
+
+/* select#cList::after { */
+/*   content: ""; */
+/*   width: 0.8em; */
+/*   height: 0.5em; */
+/*   background-color: #f2eeee; */
+/*   clip-path: polygon(100% 0%, 0 0%, 50% 100%); */
+/* } */
+
+/* select#cList option { */
+
+/* } */
