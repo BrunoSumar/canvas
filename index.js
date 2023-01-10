@@ -6,7 +6,7 @@ const path = require('path');
 const Port = 10001;
 
 fastify.register(require('fastify-static'), {
-  root: path.join(__dirname),
+  root: path.join(__dirname + '/docs'),
 });
 
 let watcher = null;
@@ -17,7 +17,7 @@ fastify.get('/watch', { websocket: true }, function wsHandler (connection, req) 
       if(watcher)
         watcher.close();
 
-      watcher = fs.watch(`./fragments/${message}.frag`);
+      watcher = fs.watch(`./docs/fragments/${message}.frag`);
       watcher.on('change', () => {
         connection.socket.send('updated');
       });

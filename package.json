@@ -4,18 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "python3 -m http.server 8000",
-    "dev": "nodemon index",
-    "start": "node ."
+    "test": "python3 -m http.server 8000 --directory ./docs",
+    "start": "nodemon index",
+    "build": "node build",
+    "dev": "node ."
   },
   "author": "eu",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^3.20.2",
-    "fastify-static": "^4.2.3",
+    "fastify": "^3.29.4",
+    "fastify-static": "^4.7.0",
     "fastify-websocket": "^3.2.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "uglify-js": "^3.17.4"
   }
 }

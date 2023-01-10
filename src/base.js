@@ -47,7 +47,6 @@ const createShader = ( gl, shader_type, shader_text ) => {
 };
 
 const attachShaderProgram = ( gl, program, ...shaders ) => {
-    console.log( shaders.length )
     shaders.forEach( shader => gl.attachShader(program, shader) );
 
     gl.linkProgram(program);
