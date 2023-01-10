@@ -1,3 +1,3 @@
 #+TITLE: Frag canvas
 
-[[https://brunosumar.github.io/canvas][Link teste]]
+[[https://brunosumar.github.io/canvas/][Link teste]]
