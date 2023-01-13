@@ -1,6 +1,6 @@
 
 const canvas_container = document.getElementById('cContainer');
-const canvas_title     = document.getElementById('cTitle');
+// const canvas_title     = document.getElementById('cTitle');
 const canvas_text      = document.getElementById('cText');
 
 const frag_canvas = createFragCanvas( 'c', INITIAL_FRAGMENT_SHADER_TEXT, 2);
@@ -21,13 +21,15 @@ const fetchFrag = async ( name ) => {
     return await res.text();
 };
 
+let current_shader = null;
 const show = async (name) => {
     try{
         canvas_container.style.display = 'none';
         const frag_text = await fetchFrag( name );
         frag_canvas.update( frag_text );
-        if( name !== canvas_title.innerHTML ){
-            canvas_title.innerHTML = name;
+        if( name !== current_shader ){
+            // canvas_title.innerHTML = name;
+            current_shader = name;
             canvas_text.innerHTML = frag_text;
             console.log(`Shader alterado para ${name}`);
         }

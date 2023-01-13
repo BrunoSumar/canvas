@@ -45,8 +45,11 @@ body {
     /* overflow: hidden; */
 }
 
+/* TODO: variar largura e atualizar na resolução do shader  */
 .container {
     width: 800px;
+    /* min-width: 800px; */
+    /* width: 80%; */
     margin: auto;
 }
 
@@ -65,7 +68,8 @@ body {
     font-family: "Consolas", monaco, monospace;
     white-space: pre;
     overflow-x: scroll;
-    /* padding: 15px; */
+    border-top: 3px solid ;
+    padding-top: 1rem;
     /* position: relative; */
     /* z-index: 10; */
 }
@@ -93,12 +97,15 @@ h3 {
 
 details summary {
   cursor: pointer;
-  border-bottom: 3px solid ;
   margin-bottom: 10px;
 }
 
 details summary > * {
   display: inline;
+}
+
+div > div:has( select#cList ){
+    padding: 1rem 1.2rem 0;
 }
 
 select#cList {
@@ -112,7 +119,7 @@ select#cList {
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
-    padding: 0 1.7rem 1rem;
+    /* padding: 1rem 1rem 0; */
     display: grid;
 }
 
