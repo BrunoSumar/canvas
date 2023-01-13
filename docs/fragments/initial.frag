@@ -8,8 +8,8 @@ void main()
 {
   vec2 uv = Position;
   vec2 m = Mouse;
-
   float ratio = Resolution.x/Resolution.y;
+
   uv.x *= ratio;
   m.x *= ratio;
 
@@ -21,18 +21,13 @@ void main()
   uv.x += cos(uv.y)+uv.y/1.7;
   uv += Time/3000.;
 
-  vec2 i = floor(uv);
+  vec4 background = vec4(0.0);
+  vec4 cor = vec4(vec3(.1, .6, 1.),1.); // azul
+  // cor = vec4(vec3(1., .0, .1),1.); // vermelho
+
   vec2 f = fract(uv);
-
-  vec4 a = vec4(vec3(.1, .6, 1.),1.);
-  // a = vec4(vec3(1., .0, .1),1.); // vermelho
-
-  vec4 b = vec4(0.0);
-
-
-  float t = step(0., cos(length(uv-m)*25.*(Time/100.)));
-  t = step(.5, f.x );
+  float t = step(.5, f.x );
   t = t * (1. - dist);
 
-  gl_FragColor = mix(b, a, t);
+  gl_FragColor = mix(background, cor, t);
 }
