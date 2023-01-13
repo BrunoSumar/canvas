@@ -5,9 +5,11 @@ const src_path = './src/';
 const build_path = './docs/';
 const build_name = 'script.min.js';
 
-const file_names = [ 'base-shaders.js', 'canvas.js', 'main.js', 'hotreload.js'];
-
 console.log( `Building ${ build_name }` );
+
+console.log( 'Listing files' );
+
+const file_names = fs.readdirSync( src_path );
 
 console.log( 'Reading files' );
 

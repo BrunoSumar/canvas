@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "python3 -m http.server 8000 --directory ./docs",
-    "start": "nodemon index",
+    "dev": "nodemon index",
     "build": "node build",
-    "dev": "node ."
+    "start": "node .",
+    "buildrun": "npm run build && npm run start"
   },
   "author": "eu",
   "license": "ISC",
