@@ -1,4 +1,4 @@
-const fragments = [ 'initial', 'star', 'flower' ];
+const fragments = [ 'initial', 'star', 'flower', 'noise' ];
 
 const listToOptions = ( list ) => {
     return list.map( name => `<option value="${ name }">${ name }</option>` ).join(' ');
