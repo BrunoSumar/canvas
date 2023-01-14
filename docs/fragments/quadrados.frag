@@ -7,6 +7,10 @@ float rand(vec2 v){
   return fract(cos(dot(v,vec2(123.78,535.983)))*887.25523);
 }
 
+
+
+
+
 float sdf(vec2 v, float r){
   return length(v) - r;
 }

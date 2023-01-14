@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "python3 -m http.server 8000 --directory ./docs",
-    "dev": "nodemon index",
+    "static": "python3 -m http.server 8000 --directory ./docs",
     "build": "node build",
     "start": "node .",
-    "buildrun": "npm run build && npm run start"
+    "dev": "nodemon -q --exec 'node build && node .'"
   },
   "author": "eu",
   "license": "ISC",
@@ -20,5 +19,8 @@
   "devDependencies": {
     "nodemon": "^2.0.20",
     "uglify-js": "^3.17.4"
+  },
+  "nodemonConfig": {
+    "ignore": ["./docs/fragments", "./docs/script.min.js"]
   }
 }

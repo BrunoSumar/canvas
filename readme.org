@@ -1,3 +1,23 @@
-#+TITLE: Frag canvas
+#+TITLE: Canvas fragment shader viewer
 
-[[https://brunosumar.github.io/canvas/][Link teste]]
+Site simples para visualização de fragment shaders com WebGL. Localmente o canvas é atualizado sempre que ocorre uma alteração no arquivo.
+
+* Instalando dependências
+#+NAME: install
+#+BEGIN_SRC bash
+  npm install
+#+END_SRC
+
+* Iniciando servidor
+#+NAME: install
+#+BEGIN_SRC bash
+  npm start
+#+END_SRC
+
+* Iniciando servidor em mode de desenvolvimento
+#+NAME: install
+#+BEGIN_SRC bash
+  npm run dev
+#+END_SRC
+
+* [[https://brunosumar.github.io/canvas/][Versão estática do site]]
